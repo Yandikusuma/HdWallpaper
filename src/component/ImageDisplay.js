@@ -11,7 +11,8 @@ import {
   TouchableOpacity,
   NativeModules, 
   Alert,
-  Button
+  Button,
+  PermissionsAndroid
 } from "react-native"
 import { createClient } from 'pexels';
 import RNFetchBlob from 'rn-fetch-blob'
@@ -64,6 +65,32 @@ downloadImage(){
    });
 }
 
+async downloadFile() {
+  try {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: "Storage Permission",
+        message: "App needs access to memory to download the file ",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK"
+      }
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      Alert.alert("Permission granted","Now you can download anything!");
+      this.downloadImage()
+    } else {
+      Alert.alert(
+        "Permission Denied!",
+        "You need to give storage permission to download the file"
+      );
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
 componentDidMount() {
   this.Findimage()
 }
@@ -97,7 +124,7 @@ undefined;
           </View>
 
           <View style={{height:"70%",width:"100%",justifyContent:"flex-end",backgroundColor:"transparent",alignItems:"center"}}>
-            <TouchableOpacity onPress={()=>this.downloadImage()}
+            <TouchableOpacity onPress={()=>this.downloadFile()}
              style={{height:"8%",width:"40%",borderRadius:15,backgroundColor:"rgba(225,225,225,0.9)",justifyContent:"center",alignItems:"center"}}>
               <Text style={{color:"#121212",fontSize:16}}>Download</Text>
             </TouchableOpacity>

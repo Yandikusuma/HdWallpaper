@@ -17,7 +17,7 @@ import {
 
 const Dev_Height = Dimensions.get('screen').height
 const Dev_Width = Dimensions.get('screen').width
-import { InterstitialAd, RewardedAd, BannerAd, TestIds, BannerAdSize} from '@react-native-firebase/admob';
+import { InterstitialAd, BannerAd, TestIds, BannerAdSize, RewardedAd, AdEventType, RewardedAdEventType } from '@react-native-firebase/admob';
 
 import { createClient } from 'pexels';
 const client = createClient('563492ad6f9170000100000162a53bd7783646a8a1adac96fca6e51c');
@@ -35,6 +35,32 @@ export default class FullScreen extends React.Component{
         this.setState({ refreshing :false })
       });
     }
+    showRewardAd = () => {
+      // Create a new instance
+      const rewardAd = RewardedAd.createForAdRequest(TestIds.REWARDED);
+
+      // Add event handlers
+      rewardAd.onAdEvent((type, error) => {
+          if (type === RewardedAdEventType.LOADED) {
+              rewardAd.show();
+          }
+
+          if (type === RewardedAdEventType.EARNED_REWARD) {
+              console.log('User earned reward of 5 lives');
+              Alert.alert(
+                  'Reward Ad',
+                  'You just earned a reward of 5 lives',
+                  [
+                    {text: 'OK', onPress: () => console.log('OK Pressed')},
+                  ],
+                  { cancelable: true }
+                )
+          }
+      });
+
+      // Load a new advert
+      rewardAd.load();
+  }
     // showInterstitialAd = () => {
 	// 	// Create a new instance
 	// 	const interstitialAd = InterstitialAd.createForAdRequest(TestIds.INTERSTITIAL);
@@ -97,10 +123,19 @@ export default class FullScreen extends React.Component{
             )
           }}
       />
-        {/* <BannerAd
+        <BannerAd
          unitId={AppConfig.ADMOD_APP_ID}
          size={BannerAdSize.SMART_BANNER}
-        /> */}
+         requestOptions={{
+          requestNonPersonalizedAdsOnly: true,
+          }}
+          onAdLoaded={() => {
+              console.log('Advert loaded');
+          }}
+          onAdFailedToLoad={(error) => {
+              console.error('Advert failed to load: ', error);
+          }}
+        />
       </View>
       </SafeAreaView>
     )
